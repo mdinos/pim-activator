@@ -4,6 +4,8 @@ import { roles, allServices, allTags, type Role } from './data/roles';
 import SearchBar from './components/SearchBar';
 import RoleCard from './components/RoleCard';
 import RoleDetail from './components/RoleDetail';
+import ActiveRolesBanner from './components/ActiveRolesBanner';
+import { useActivations } from './hooks/useActivations';
 
 function matchesQuery(role: Role, q: string): boolean {
   const lower = q.toLowerCase();
@@ -26,6 +28,7 @@ function App() {
   const [filterPanelOpen, setFilterPanelOpen] = useState(false);
   const [selectedServices, setSelectedServices] = useState<Set<string>>(new Set());
   const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
+  const { activations, activate, revoke, dismiss } = useActivations();
 
   const toggleService = useCallback((s: string) => {
     setSelectedServices((prev) => {
@@ -86,6 +89,7 @@ function App() {
             </p>
           </div>
         </div>
+        <ActiveRolesBanner activations={activations} onRevoke={revoke} onDismiss={dismiss} />
       </header>
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
@@ -211,6 +215,7 @@ function App() {
                 key={role.id}
                 role={role}
                 searchQuery={query}
+                activation={activations[role.id]}
                 onClick={() => setSelectedRole(role)}
               />
             ))}
@@ -255,7 +260,14 @@ function App() {
 
       {/* Detail panel */}
       {selectedRole && (
-        <RoleDetail role={selectedRole} onClose={() => setSelectedRole(null)} />
+        <RoleDetail
+          role={selectedRole}
+          activation={activations[selectedRole.id]}
+          onClose={() => setSelectedRole(null)}
+          onActivate={activate}
+          onRevoke={revoke}
+          onDismiss={dismiss}
+        />
       )}
     </div>
   );

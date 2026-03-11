@@ -4,10 +4,17 @@ import type { Permission, Role } from '../data/roles';
 import PermissionBadge from './PermissionBadge';
 import RoleIcon from './RoleIcon';
 import { getRoleColors } from './roleColors';
+import ActivationPanel from './ActivationPanel';
+import type { Activation } from '../hooks/useActivations';
+import type { ActivationRequest } from '../api/activations';
 
 interface Props {
   role: Role;
+  activation?: Activation;
   onClose: () => void;
+  onActivate: (req: ActivationRequest) => void;
+  onRevoke: (roleId: string) => void;
+  onDismiss: (roleId: string) => void;
 }
 
 function groupByService(permissions: Permission[]): Record<string, Permission[]> {
@@ -57,7 +64,7 @@ function ServiceGroup({ service, permissions, defaultOpen = true }: { service: s
   );
 }
 
-export default function RoleDetail({ role, onClose }: Props) {
+export default function RoleDetail({ role, activation, onClose, onActivate, onRevoke, onDismiss }: Props) {
   const colors = getRoleColors(role.color);
   const grouped = groupByService(role.permissions);
 
@@ -178,6 +185,15 @@ export default function RoleDetail({ role, onClose }: Props) {
             </section>
           )}
         </div>
+
+        {/* Sticky activation footer */}
+        <ActivationPanel
+          role={role}
+          activation={activation}
+          onActivate={onActivate}
+          onRevoke={onRevoke}
+          onDismiss={onDismiss}
+        />
       </div>
     </div>
   );
